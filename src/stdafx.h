@@ -10,6 +10,7 @@
 #pragma warning(disable:4996) // Using open/close/read... for file access
 #include <SDKDDKVer.h>
 #define WIN32_LEAN_AND_MEAN
+#define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
 #include <gl/gl.h>
 #include <GL/glu.h>

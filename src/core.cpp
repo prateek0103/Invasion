@@ -1,4 +1,5 @@
 // core.cpp
+
 #include "stdafx.h"
 #include "base.h"
 #include "core.h"
@@ -54,10 +55,10 @@ int CORE_LoadBmp(const char filename[], bool wrap)
 	GLint              retval = -1;
 	struct CORE_BMPFileHeader hdr;
 
-	int fd = open(filename, O_RDONLY);
+	int fd = _open(filename, O_RDONLY);
 	if (fd != -1)
 	{
-		read(fd, &hdr, sizeof(hdr));
+		_read(fd, &hdr, sizeof(hdr));
 
 		if (hdr.mark[0] == 'B' && hdr.mark[1] == 'M')
 		{
@@ -82,15 +83,15 @@ int CORE_LoadBmp(const char filename[], bool wrap)
 			if (!pixdatasize)
 				pixdatasize = (width * abs(height) * READ_LE_WORD(hdr.bpp) / 8);
 
-			lseek(fd, offset, SEEK_SET);
+			_lseek(fd, offset, SEEK_SET);
 			if (height > 0)
-				read(fd, pixloadbuffer, pixdatasize);
+				_read(fd, pixloadbuffer, pixdatasize);
 			else
 			{
 				// Reverse while loading
 				int nrows = -height;
 				for (int i = 0; i < nrows; i++)
-					read(fd, pixloadbuffer + (nrows - i - 1) * width * 4, (pixdatasize / nrows));
+					_read(fd, pixloadbuffer + (nrows - i - 1) * width * 4, (pixdatasize / nrows));
 			}
 
 			GLuint texid = 1;
@@ -119,7 +120,7 @@ int CORE_LoadBmp(const char filename[], bool wrap)
 			g_textures[retval].w = width / (float)width_pow2;
 			g_textures[retval].h = height / (float)height_pow2;
 		}
-		close(fd);
+		_close(fd);
 	}
 
 	return retval;

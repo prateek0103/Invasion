@@ -29,12 +29,12 @@ void Render()
 //-----------------------------------------------------------------------------
 void StartGame()
 {
-	g_ship_LL = CORE_LoadBmp("ShipLL.bmp", false);
-	g_ship_L = CORE_LoadBmp("ShipL.bmp", false);
-	g_ship_C = CORE_LoadBmp("ShipC.bmp", false);
-	g_ship_R = CORE_LoadBmp("ShipR.bmp", false);
-	g_ship_RR = CORE_LoadBmp("ShipRR.bmp", false);
-	g_bkg = CORE_LoadBmp("bkg0.bmp", false);
+	g_ship_LL = CORE_LoadBmp("data/ShipLL.bmp", false);
+	g_ship_L = CORE_LoadBmp("data/ShipL.bmp", false);
+	g_ship_C = CORE_LoadBmp("data/ShipC.bmp", false);
+	g_ship_R = CORE_LoadBmp("data/ShipR.bmp", false);
+	g_ship_RR = CORE_LoadBmp("data/ShipRR.bmp", false);
+	g_bkg = CORE_LoadBmp("data/bkg0.bmp", false);
 }
 
 void EndGame()
