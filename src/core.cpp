@@ -143,8 +143,12 @@ ivec2 CORE_GetBmpSize(int texix)
 }
 
 //-----------------------------------------------------------------------------
-void CORE_RenderCenteredSprite(vec2 pos, vec2 size, int texix)
+void CORE_RenderCenteredSprite(vec2 pos, vec2 size, int texix, rgba color, bool additive)
 {
+	glColor4f(color.r, color.g, color.b, color.a);
+	if (additive) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	else          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	vec2 p0 = vsub(pos, vscale(size, .5f));
 	vec2 p1 = vadd(pos, vscale(size, .5f));
 
