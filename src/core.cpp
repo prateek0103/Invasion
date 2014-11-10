@@ -1,5 +1,4 @@
 // core.cpp
-
 #include "stdafx.h"
 #include "base.h"
 #include "core.h"
@@ -7,7 +6,7 @@
 //========================================================================================
 // Loading textures (from BMP files)
 
-#define MAX_TEXTURES 32
+#define MAX_TEXTURES 256
 struct Texture
 {
 	bool used;
@@ -40,11 +39,6 @@ struct CORE_BMPFileHeader
 	byte  numimportantcolors[4];
 };
 
-#define SND_MAX_SOURCES 8
-#define SND_MAX_LOOP_SOUNDS 2
-ALuint SND_Sources[SND_MAX_SOURCES];
-int    SND_NextSource = 0;
-
 //-----------------------------------------------------------------------------
 #define READ_LE_WORD(a)  (a[0] + a[1]*0x100)
 #define READ_LE_DWORD(a) (a[0] + a[1]*0x100 + a[2]*0x10000 + a[3]*0x1000000)
@@ -55,21 +49,15 @@ dword hp2(dword v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v 
 
 //-----------------------------------------------------------------------------
 static byte pixloadbuffer[2048 * 2048 * 4];
-
-GLuint CORE_GetBmpOpenGLTex(int texix)
-{
-	return g_textures[texix].tex;
-}
-
 int CORE_LoadBmp(const char filename[], bool wrap)
 {
 	GLint              retval = -1;
 	struct CORE_BMPFileHeader hdr;
 
-	int fd = _open(filename, O_RDONLY);
+	int fd = open(filename, O_RDONLY);
 	if (fd != -1)
 	{
-		_read(fd, &hdr, sizeof(hdr));
+		read(fd, &hdr, sizeof(hdr));
 
 		if (hdr.mark[0] == 'B' && hdr.mark[1] == 'M')
 		{
@@ -84,7 +72,10 @@ int CORE_LoadBmp(const char filename[], bool wrap)
 			}
 
 			if (retval == -1)
+			{
+				LOG(("Maximum textures number exceeded"));
 				return retval;
+			}
 
 			dword  width = READ_LE_DWORD(hdr.width);
 			sdword height = READ_LE_DWORD(hdr.height);
@@ -94,15 +85,15 @@ int CORE_LoadBmp(const char filename[], bool wrap)
 			if (!pixdatasize)
 				pixdatasize = (width * abs(height) * READ_LE_WORD(hdr.bpp) / 8);
 
-			_lseek(fd, offset, SEEK_SET);
+			lseek(fd, offset, SEEK_SET);
 			if (height > 0)
-				_read(fd, pixloadbuffer, pixdatasize);
+				read(fd, pixloadbuffer, pixdatasize);
 			else
 			{
 				// Reverse while loading
 				int nrows = -height;
 				for (int i = 0; i < nrows; i++)
-					_read(fd, pixloadbuffer + (nrows - i - 1) * width * 4, (pixdatasize / nrows));
+					read(fd, pixloadbuffer + (nrows - i - 1) * width * 4, (pixdatasize / nrows));
 			}
 
 			GLuint texid = 1;
@@ -131,7 +122,7 @@ int CORE_LoadBmp(const char filename[], bool wrap)
 			g_textures[retval].w = width / (float)width_pow2;
 			g_textures[retval].h = height / (float)height_pow2;
 		}
-		_close(fd);
+		close(fd);
 	}
 
 	return retval;
@@ -154,6 +145,12 @@ ivec2 CORE_GetBmpSize(int texix)
 }
 
 //-----------------------------------------------------------------------------
+GLuint CORE_GetBmpOpenGLTex(int texix)
+{
+	return g_textures[texix].tex;
+}
+
+//-----------------------------------------------------------------------------
 void CORE_RenderCenteredSprite(vec2 pos, vec2 size, int texix, rgba color, bool additive)
 {
 	glColor4f(color.r, color.g, color.b, color.a);
@@ -172,6 +169,14 @@ void CORE_RenderCenteredSprite(vec2 pos, vec2 size, int texix, rgba color, bool 
 	glEnd();
 }
 
+//=============================================================================
+// Sound (OpenAL, WAV files), leave last one for music!
+#define SND_MAX_SOURCES 8
+#define SND_MAX_LOOP_SOUNDS 2
+ALuint SND_Sources[SND_MAX_SOURCES];
+int    SND_NextSource = 0;
+
+//-----------------------------------------------------------------------------
 bool CORE_InitSound()
 {
 	ALCcontext *context;
@@ -281,10 +286,10 @@ ALuint CORE_LoadWav(const char filename[])
 	ALuint          retval = UINT_MAX;
 	CORE_RIFFHeader hdr;
 
-	int fd = _open(filename, O_RDONLY);
+	int fd = open(filename, O_RDONLY);
 	if (fd != -1)
 	{
-		_read(fd, &hdr, sizeof(hdr));
+		read(fd, &hdr, sizeof(hdr));
 
 		if (hdr.chunkID[0] == 'R' && hdr.chunkID[1] == 'I' && hdr.chunkID[2] == 'F' && hdr.chunkID[3] == 'F'
 			&& hdr.format[0] == 'W' && hdr.format[1] == 'A' && hdr.format[2] == 'V' && hdr.format[3] == 'E')
@@ -295,15 +300,15 @@ ALuint CORE_LoadWav(const char filename[])
 			for (;;)
 			{
 				CORE_RIFFChunkHeader chunkhdr;
-				if (_read(fd, &chunkhdr, sizeof(chunkhdr)) < sizeof(chunkhdr))
+				if (read(fd, &chunkhdr, sizeof(chunkhdr)) < sizeof(chunkhdr))
 					break;
 
 				dword chunkdatasize = READ_LE_DWORD(chunkhdr.subChunkSize);
 
 				if (chunkhdr.subChunkID[0] == 'f' && chunkhdr.subChunkID[1] == 'm' && chunkhdr.subChunkID[2] == 't' && chunkhdr.subChunkID[3] == ' ')
 				{
-					_read(fd, &fmt, sizeof(fmt));
-					_lseek(fd, ((1 + chunkdatasize) & -2) - sizeof(fmt), SEEK_CUR); // Skip to next chunk
+					read(fd, &fmt, sizeof(fmt));
+					lseek(fd, ((1 + chunkdatasize) & -2) - sizeof(fmt), SEEK_CUR); // Skip to next chunk
 				}
 				else if (chunkhdr.subChunkID[0] == 'd' && chunkhdr.subChunkID[1] == 'a' && chunkhdr.subChunkID[2] == 't' && chunkhdr.subChunkID[3] == 'a')
 				{
@@ -311,7 +316,7 @@ ALuint CORE_LoadWav(const char filename[])
 					if (contentsize > sizeof(soundloadbuffer))
 						contentsize = sizeof(soundloadbuffer);
 
-					_read(fd, soundloadbuffer, contentsize);
+					read(fd, soundloadbuffer, contentsize);
 
 					bool valid = true;
 					ALsizei al_size = contentsize;
@@ -341,10 +346,10 @@ ALuint CORE_LoadWav(const char filename[])
 					break;
 				}
 				else
-					_lseek(fd, ((1 + READ_LE_DWORD(chunkhdr.subChunkSize)) & -2), SEEK_CUR); // Skip to next chunk
+					lseek(fd, ((1 + READ_LE_DWORD(chunkhdr.subChunkSize)) & -2), SEEK_CUR); // Skip to next chunk
 			}
 		}
-		_close(fd);
+		close(fd);
 	}
 
 	return retval;

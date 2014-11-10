@@ -14,6 +14,12 @@ typedef unsigned       int  uint;
 //-----------------------------------------------------------------------------
 // Useful macros
 #define SIZE_ARRAY(__a__) (sizeof(__a__)/sizeof(__a__[0]))
+#define LOG(ALL_ARGS) printf ALL_ARGS
+//#define LOG(ALL_ARGS)
+#define SAFESUB(ARG_BASE, ARG_CHUNK)          (ARG_BASE - ARG_CHUNK > 0        ? ARG_BASE - ARG_CHUNK : 0)
+#define SAFEADD(ARG_BASE, ARG_CHUNK, ARG_MAX) (ARG_BASE + ARG_CHUNK <= ARG_MAX ? ARG_BASE + ARG_CHUNK : ARG_MAX)
+#define MAX(ARG_A, ARG_B) ((ARG_A)>(ARG_B)?(ARG_A):(ARG_B))
+#define MIN(ARG_A, ARG_B) ((ARG_A)<(ARG_B)?(ARG_A):(ARG_B))
 
 //-----------------------------------------------------------------------------
 struct ivec2 { int x, y; };
@@ -29,4 +35,5 @@ inline float vlen(vec2 v)           { return (float)sqrt(vlen2(v)); }
 inline float vdot(vec2 v1, vec2 v2) { return v1.x * v2.x + v1.y * v2.y; }
 inline vec2  vunit(float angle)      { return vmake((float)cos(angle), (float)sin(angle)); }
 inline vec2  vunit(vec2 v)           { return vscale(v, 1.f / vlen(v)); }
+
 #endif

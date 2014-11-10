@@ -1,5 +1,3 @@
-
-
 // sys.h
 #ifndef _SYS_H_
 #define _SYS_H_
@@ -7,7 +5,7 @@
 //========================================================================================
 // Resolution (real & virtual)
 
-// Portrait 2:3 aspect ratio
+// Proportional to iPhone for Mac: 512x768 (it's 80% of 640x960, which is iPhone Retina)
 #define SYS_WIDTH  512
 #define SYS_HEIGHT 768
 #define SYS_FULLSCREEN 0
@@ -34,6 +32,9 @@ bool  SYS_MouseButonPressed(int button);
 #define SYS_KEY_DOWN  VK_DOWN
 #define SYS_KEY_LEFT  VK_LEFT
 #define SYS_KEY_RIGHT VK_RIGHT
+#define SYS_KEY_ENTER VK_RETURN
+#define SYS_KEY_ESC   VK_ESCAPE
+#define SYS_KEY_SPACE VK_SPACE
 
 #define SYS_MB_LEFT   VK_LBUTTON
 #define SYS_MB_RIGHT  VK_RBUTTON
@@ -48,12 +49,15 @@ bool  SYS_MouseButonPressed(int button);
 #define SYS_KEY_DOWN  GLFW_KEY_DOWN
 #define SYS_KEY_LEFT  GLFW_KEY_LEFT
 #define SYS_KEY_RIGHT GLFW_KEY_RIGHT
+#define SYS_KEY_ENTER GLFW_KEY_ENTER
+#define SYS_KEY_ESC   GLFW_KEY_ESC
+#define SYS_KEY_SPACE GLFW_KEY_SPACE
 
 #define SYS_MB_LEFT   GLFW_MOUSE_BUTTON_LEFT
 #define SYS_MB_RIGHT  GLFW_MOUSE_BUTTON_RIGHT
 #define SYS_MB_MIDDLE GLFW_MOUSE_BUTTON_MIDDLE
 
-#endif //defined(__MACH__) && TARGET_OS_MAC && !TARGET_OS_IPHONE
+#endif //defined(__MACH__) & TARGET_OS_MAC & !TARGET_OS_IPHONE
 #endif //defined(__APPLE__)
 //-----------------------------------------------------------------------------
 

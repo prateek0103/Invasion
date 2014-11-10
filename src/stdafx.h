@@ -1,4 +1,3 @@
-
 // stdafx.h
 #ifndef _STDAFX_H_
 #define _STDAFX_H_
@@ -8,9 +7,10 @@
 
 #pragma pack(1)
 #pragma warning(disable:4996) // Using open/close/read... for file access
+#define _CRT_NONSTDC_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
 #include <SDKDDKVer.h>
 #define WIN32_LEAN_AND_MEAN
-#define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
 #include <gl/gl.h>
 #include <GL/glu.h>
@@ -33,7 +33,7 @@
 #endif
 
 //=============================================================================
-// Common includes
+// Common includes		
 
 #include <stdlib.h>
 #include <stdio.h>
